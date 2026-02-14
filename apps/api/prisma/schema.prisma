@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Clinic {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  members      ClinicMember[]
+  invites      Invite[]
+  tutors       Tutor[]
+  pets         Pet[]
+  appointments Appointment[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  memberships ClinicMember[]
+}
+
+model ClinicMember {
+  id       String @id @default(uuid())
+  role     Role
+  clinicId String
+  userId   String
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicId, userId])
+}
+
+model Invite {
+  id        String    @id @default(uuid())
+  email     String
+  role      Role
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+}
+
+model Tutor {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  clinicId  String
+  createdAt DateTime @default(now())
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  pets   Pet[]
+}
+
+model Pet {
+  id        String   @id @default(uuid())
+  name      String
+  species   String
+  breed     String?
+  tutorId   String
+  clinicId  String
+  createdAt DateTime @default(now())
+
+  tutor        Tutor         @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  clinic       Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id     String            @id @default(uuid())
+  date   DateTime
+  status AppointmentStatus @default(SCHEDULED)
+
+  clinicId  String
+  petId     String?
+  createdAt DateTime @default(now())
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  pet    Pet?   @relation(fields: [petId], references: [id], onDelete: SetNull)
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  DOCTOR
+  RECEPTION
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}

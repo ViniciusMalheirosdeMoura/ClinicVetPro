@@ -1,0 +1,24 @@
+{
+  "name": "ClinicVetPro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "dev": "concurrently \"pnpm --filter web dev\" \"pnpm --filter api dev\"",
+  "db:migrate": "pnpm --filter api prisma migrate dev",
+  "db:generate": "pnpm --filter api prisma generate",
+  "db:seed": "pnpm --filter api prisma db seed"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.29.3",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+} 
