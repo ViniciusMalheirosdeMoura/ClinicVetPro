@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { login, registerOwner } from "../services/auth.service.js";
+import { login, registerOwner, selectClinic } from "../services/auth.service.js";
 
 export async function registerOwnerController(req: Request, res: Response) {
   const { clinicName, name, email, password } = req.body ?? {};
@@ -9,8 +9,8 @@ export async function registerOwnerController(req: Request, res: Response) {
 
   try {
     const result = await registerOwner({ clinicName, name, email, password });
-    if ("error" in result) return res.status(409).json(result);
-    return res.status(201).json(result);
+    if (!result.ok) return res.status(result.code).json({ error: result.error });
+    return res.status(201).json(result.data);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Erro interno ao registrar dono." });
@@ -23,10 +23,26 @@ export async function loginController(req: Request, res: Response) {
 
   try {
     const result = await login({ email, password });
-    if ("error" in result) return res.status(401).json(result);
-    return res.json(result);
+    if (!result.ok) return res.status(result.code).json({ error: result.error });
+    return res.json(result.data);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Erro ao fazer login." });
+  }
+}
+
+export async function selectClinicController(req: Request, res: Response) {
+  const { email, password, clinicId } = req.body ?? {};
+  if (!email || !password || !clinicId) {
+    return res.status(400).json({ error: "email, password e clinicId são obrigatórios." });
+  }
+
+  try {
+    const result = await selectClinic({ email, password, clinicId });
+    if (!result.ok) return res.status(result.code).json({ error: result.error });
+    return res.json(result.data);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao selecionar clínica." });
   }
 }
